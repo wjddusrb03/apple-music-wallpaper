@@ -92,8 +92,8 @@ echo  [5/5] Creating desktop shortcut...
 set "SCRIPT_DIR=%~dp0"
 set "SHORTCUT=%USERPROFILE%\Desktop\Apple Music Wallpaper.lnk"
 
-powershell -NoProfile -Command ^
-  "$ws = New-Object -ComObject WScript.Shell; $sc = $ws.CreateShortcut('%SHORTCUT%'); $sc.TargetPath = '%SCRIPT_DIR%start.bat'; $sc.WorkingDirectory = '%SCRIPT_DIR%'; $sc.Description = 'Apple Music Wallpaper'; $sc.Save()"
+powershell -NoProfile -ExecutionPolicy Bypass -Command ^
+  "$target = Join-Path '%SCRIPT_DIR%' 'start.bat'; $ws = New-Object -ComObject WScript.Shell; $sc = $ws.CreateShortcut([Environment]::GetFolderPath('Desktop') + '\Apple Music Wallpaper.lnk'); $sc.TargetPath = $target; $sc.WorkingDirectory = '%SCRIPT_DIR%'; $sc.Description = 'Apple Music Wallpaper'; $sc.Save()"
 
 if exist "%SHORTCUT%" (
     echo        Shortcut created on Desktop.
