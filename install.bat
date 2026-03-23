@@ -13,23 +13,28 @@ echo.
 :: ── Step 1: Check Python ──
 echo  [1/5] Checking Python...
 python --version >nul 2>&1
-if %ERRORLEVEL% NEQ 0 (
-    echo.
-    echo  [!] Python is not installed.
-    echo      Download from: https://www.python.org/downloads/
-    echo      IMPORTANT: Check "Add Python to PATH" during install.
-    echo.
-    echo  Press any key to open the download page...
-    pause >nul
-    start https://www.python.org/downloads/
-    echo.
-    echo  After installing Python, run this installer again.
-    pause >nul
-    exit /b 1
-)
+if %ERRORLEVEL% NEQ 0 goto :nopython
+pip --version >nul 2>&1
+if %ERRORLEVEL% NEQ 0 goto :nopython
 for /f "tokens=2" %%v in ('python --version 2^>^&1') do echo        Found Python %%v
+goto :step2
+
+:nopython
+echo.
+echo  [!] Python is not installed or not in PATH.
+echo      Download from: https://www.python.org/downloads/
+echo      IMPORTANT: Check "Add Python to PATH" during install.
+echo.
+echo  Press any key to open the download page...
+pause >nul
+start https://www.python.org/downloads/
+echo.
+echo  After installing Python, run this installer again.
+pause >nul
+exit /b 1
 
 :: ── Step 2: Install packages ──
+:step2
 echo.
 echo  [2/5] Installing Python packages...
 pip install fastapi uvicorn "winrt-Windows.Media.Control" "winrt-Windows.Foundation" "winrt-Windows.Foundation.Collections" "winrt-Windows.Storage.Streams" -q 2>nul
@@ -117,3 +122,5 @@ choice /C YN /M "  Launch now? (Y/N)"
 if %ERRORLEVEL% EQU 1 (
     call "%SCRIPT_DIR%start.bat"
 )
+
+pause >nul
