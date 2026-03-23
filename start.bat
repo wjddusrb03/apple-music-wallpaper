@@ -8,11 +8,11 @@ echo ==================================================
 echo.
 
 REM Kill previous server only (by PID file)
-if exist "server.pid" (
-    set /p OLD_PID=<server.pid
-    taskkill /F /PID %OLD_PID% >nul 2>&1
-    del server.pid >nul 2>&1
-)
+if not exist "server.pid" goto SKIP_KILL
+set /p OLD_PID=<server.pid
+taskkill /F /PID %OLD_PID% >nul 2>&1
+del server.pid >nul 2>&1
+:SKIP_KILL
 
 if exist "python\python.exe" goto READY
 

@@ -33,9 +33,9 @@ git clone https://github.com/wjddusrb03/apple-music-wallpaper.git
 또는 [**Download ZIP**](https://github.com/wjddusrb03/apple-music-wallpaper/archive/refs/heads/master.zip)
 
 **2단계: 실행**
-```
-start.bat 더블클릭
-```
+
+`start.bat` 더블클릭
+
 > 첫 실행 시 Python과 필요한 패키지가 자동으로 다운로드됩니다 (1~2분).
 > 이후 실행은 즉시 시작됩니다.
 
@@ -45,7 +45,16 @@ start.bat 더블클릭
 3. `http://localhost:8765` 입력
 4. 확인!
 
-> 한 번 등록하면 Lively가 기억하므로, 이후에는 `start.bat`만 실행하면 됩니다.
+> 한 번 등록하면 Lively가 기억하므로, 이후에는 다시 설정할 필요 없습니다.
+
+### 이후 실행 / 종료
+
+| 동작 | 방법 |
+|------|------|
+| **시작** | `AppleMusicWallpaper.vbs` 더블클릭 (CMD 창 없이 조용히 실행) |
+| **종료** | `StopWallpaper.vbs` 더블클릭 (서버 + Lively 한 번에 종료) |
+
+> 첫 실행만 `start.bat`을 사용합니다. 이후에는 VBS 파일로 간편하게 시작/종료하세요.
 
 ## 작동 방식
 
@@ -61,19 +70,21 @@ Apple Music --> Windows SMTC API --> Python Server --> WebSocket --> HTML Wallpa
 
 ```
 apple-music-wallpaper/
-├── server.py          # FastAPI 서버 (SMTC + WebSocket)
+├── AppleMusicWallpaper.vbs  # 시작 (CMD 창 없음)
+├── StopWallpaper.vbs        # 종료 (서버 + Lively 종료)
+├── start.bat                # 첫 실행용 (자동 Python 설치)
+├── server.py                # FastAPI 서버 (SMTC + WebSocket)
 ├── wallpaper/
-│   └── index.html     # 라이브 월페이퍼 UI
-├── start.bat          # 원클릭 실행 (자동 Python 설치 포함)
-├── requirements.txt   # Python 패키지 목록
-├── python/            # (자동 생성) 임베디드 Python
+│   └── index.html           # 라이브 월페이퍼 UI
+├── requirements.txt         # Python 패키지 목록
+├── python/                  # (자동 생성) 임베디드 Python
 └── README.md
 ```
 
 ## 최적화
 
 - **앨범 아트 캐싱**: 곡이 바뀔 때만 이미지를 다시 읽음
-- **SMTC 매니저 싱글톤**: API 연결을 재사용
+- **SMTC 매니저 자동 복구**: PC 절전/복귀 후에도 자동 재연결
 - **최소 브로드캐스트**: 같은 곡이면 재생 위치만 전송
 - **GPU 가속**: `translateZ(0)`, `contain: strict` 적용
 - **마우스 패스스루**: `pointer-events: none`으로 바탕화면 조작에 영향 없음
@@ -87,6 +98,7 @@ apple-music-wallpaper/
 | 우측 하단 점이 빨간색 | `start.bat`으로 서버를 실행하세요 |
 | 첫 실행에서 멈춤 | 인터넷 연결을 확인하세요 (Python 다운로드 필요) |
 | Lively가 안 열림 | Microsoft Store에서 Lively Wallpaper를 설치하세요 |
+| PC 절전 후 작동 안 함 | 자동 복구됩니다. 잠시 기다려주세요 |
 
 ## 주의 사항
 

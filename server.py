@@ -2,6 +2,7 @@ import asyncio
 import json
 import base64
 import os
+from contextlib import asynccontextmanager
 import uvicorn
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
@@ -11,7 +12,16 @@ from fastapi.responses import FileResponse
 # Use absolute paths (fixes VBS launch from different working directory)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-app = FastAPI()
+
+@asynccontextmanager
+async def lifespan(app):
+    # Startup
+    asyncio.create_task(poll_media())
+    yield
+    # Shutdown (nothing to clean up)
+
+
+app = FastAPI(lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -30,9 +40,9 @@ _cached_art_key: str = ""
 _smtc_manager = None
 
 
-async def _get_manager():
+async def _get_manager(force_refresh=False):
     global _smtc_manager
-    if _smtc_manager is None:
+    if _smtc_manager is None or force_refresh:
         from winrt.windows.media.control import GlobalSystemMediaTransportControlsSessionManager
         _smtc_manager = await GlobalSystemMediaTransportControlsSessionManager.request_async()
     return _smtc_manager
@@ -71,23 +81,28 @@ async def broadcast(data: dict):
 
 
 async def get_session():
-    manager = await _get_manager()
-    sessions = manager.get_sessions()
+    try:
+        manager = await _get_manager()
+        sessions = manager.get_sessions()
 
-    # Priority 1: Apple Music / iTunes (exact match)
-    for session in sessions:
-        src = session.source_app_user_model_id.lower()
-        if "apple" in src or "itunes" in src:
-            return session
+        # Priority 1: Apple Music / iTunes (exact match)
+        for session in sessions:
+            src = session.source_app_user_model_id.lower()
+            if "apple" in src or "itunes" in src:
+                return session
 
-    # Priority 2: Any app with "music" but NOT Windows built-in players
-    EXCLUDE = ["zune", "groove", "microsoft"]
-    for session in sessions:
-        src = session.source_app_user_model_id.lower()
-        if "music" in src and not any(ex in src for ex in EXCLUDE):
-            return session
+        # Priority 2: Any app with "music" but NOT Windows built-in players
+        EXCLUDE = ["zune", "groove", "microsoft"]
+        for session in sessions:
+            src = session.source_app_user_model_id.lower()
+            if "music" in src and not any(ex in src for ex in EXCLUDE):
+                return session
 
-    return None
+        return None
+    except Exception:
+        # Manager stale after sleep/wake - refresh it
+        await _get_manager(force_refresh=True)
+        return None
 
 
 async def _read_album_art(thumbnail) -> str:
@@ -198,11 +213,6 @@ async def poll_media():
             print(f"[Poll Error] {e}")
 
         await asyncio.sleep(1)
-
-
-@app.on_event("startup")
-async def startup():
-    asyncio.create_task(poll_media())
 
 
 if __name__ == "__main__":
