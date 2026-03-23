@@ -30,11 +30,11 @@ del python_embed.zip
 echo [3/4] Installing pip...
 powershell -NoProfile -Command "(Get-Content 'python\python312._pth') -replace '#import site','import site' | Set-Content 'python\python312._pth'"
 powershell -NoProfile -Command "Invoke-WebRequest -Uri 'https://bootstrap.pypa.io/get-pip.py' -OutFile 'get-pip.py'"
-python\python.exe get-pip.py --quiet
+python\python.exe get-pip.py --quiet --no-warn-script-location
 del get-pip.py
 
 echo [4/4] Installing packages...
-python\python.exe -m pip install --quiet fastapi uvicorn websockets winrt-Windows.Media.Control winrt-Windows.Foundation winrt-Windows.Foundation.Collections winrt-Windows.Storage.Streams
+python\python.exe -m pip install --quiet --no-warn-script-location fastapi uvicorn websockets winrt-Windows.Media.Control winrt-Windows.Foundation winrt-Windows.Foundation.Collections winrt-Windows.Storage.Streams
 if errorlevel 1 goto INSTALL_FAIL
 
 echo.
