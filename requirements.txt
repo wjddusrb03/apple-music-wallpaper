@@ -1,5 +1,6 @@
-fastapi
-uvicorn
+pywebview
+pystray
+Pillow
 winrt-Windows.Media.Control
 winrt-Windows.Foundation
 winrt-Windows.Foundation.Collections

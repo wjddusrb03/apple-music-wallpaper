@@ -12,12 +12,10 @@
     font-family: -apple-system, 'SF Pro Display', 'Helvetica Neue', 'Segoe UI', sans-serif;
     background: #080810;
     user-select: none;
-    pointer-events: none;       /* 모든 마우스 이벤트 패스스루 → 바탕화면 버벅임 해결 */
+    pointer-events: none;
   }
 
-  /* ══════════════════════════════
-     배경
-  ══════════════════════════════ */
+  /* ── Background ── */
   .bg-layer {
     position: fixed;
     inset: -250px;
@@ -47,9 +45,7 @@
     background-size: 180px 180px;
   }
 
-  /* ══════════════════════════════
-     플레이어 (보기 전용)
-  ══════════════════════════════ */
+  /* ── Player Card ── */
   #player {
     position: relative; z-index: 3;
     width: 100%; height: 100%;
@@ -72,9 +68,7 @@
     transform: translateZ(0);
   }
 
-  /* ══════════════════════════════
-     앨범 아트
-  ══════════════════════════════ */
+  /* ── Album Art ── */
   #art-wrap { position: relative; margin-bottom: 32px; }
 
   #art-glow {
@@ -114,14 +108,23 @@
     animation: art-glow-pulse 4s ease-in-out infinite;
   }
 
-  /* ══════════════════════════════
-     곡 정보
-  ══════════════════════════════ */
+  /* ── Song Info ── */
   #song-info { text-align: center; max-width: 440px; margin-bottom: 20px; }
 
-  /* ══════════════════════════════
-     진행바 (보기 전용)
-  ══════════════════════════════ */
+  #title {
+    font-size: 24px; font-weight: 700;
+    color: #fff; letter-spacing: -0.3px;
+    margin-bottom: 8px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    text-shadow: 0 1px 16px rgba(0,0,0,0.7);
+  }
+  #artist {
+    font-size: 15px; font-weight: 500;
+    color: rgba(255,255,255,0.52);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+
+  /* ── Progress Bar ── */
   #progress-wrapper { width: 400px; }
   #progress-track {
     width: 100%; height: 4px;
@@ -140,27 +143,6 @@
     font-size: 11px; font-weight: 500;
     color: rgba(255,255,255,0.33);
   }
-  #title {
-    font-size: 24px; font-weight: 700;
-    color: #fff; letter-spacing: -0.3px;
-    margin-bottom: 8px;
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    text-shadow: 0 1px 16px rgba(0,0,0,0.7);
-  }
-  #artist {
-    font-size: 15px; font-weight: 500;
-    color: rgba(255,255,255,0.52);
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  }
-
-  #status-dot {
-    position: fixed; bottom: 18px; right: 22px;
-    width: 7px; height: 7px; border-radius: 50%;
-    background: #4caf50; z-index: 10;
-    opacity: 0.5; transition: background 0.3s;
-  }
-  #status-dot.disconnected { background: #f44336; }
-
 </style>
 </head>
 <body>
@@ -187,24 +169,20 @@
   </div>
 </div>
 
-<div id="status-dot"></div>
-
 <script>
-const WS = 'ws://127.0.0.1:8765/ws';
-
-let ws, lastArt = '', activeBg = 'a';
-
+/* ── DOM Cache ── */
 const $title   = document.getElementById('title');
 const $artist  = document.getElementById('artist');
 const $art     = document.getElementById('album-art');
 const $glow    = document.getElementById('art-glow');
-const $dot     = document.getElementById('status-dot');
 const $fill    = document.getElementById('progress-fill');
 const $curTime = document.getElementById('current-time');
 const $totTime = document.getElementById('total-time');
 
+let lastArt = '', activeBg = 'a';
 let serverPos = 0, serverDur = 0, serverTime = 0, isPlaying = false;
 
+/* ── Time Format ── */
 function fmt(s) {
   if (!s || s < 0) s = 0;
   const m = Math.floor(s / 60);
@@ -212,6 +190,7 @@ function fmt(s) {
   return m + ':' + (sec < 10 ? '0' : '') + sec;
 }
 
+/* ── Smooth Progress (rAF interpolation) ── */
 function getCurrentPos() {
   if (!isPlaying) return serverPos;
   return serverPos + (performance.now() - serverTime) / 1000;
@@ -227,7 +206,7 @@ function rafLoop() {
 }
 requestAnimationFrame(rafLoop);
 
-// ── 필름 그레인 (1회) ──────────────────────────
+/* ── Film Grain (once) ── */
 (function() {
   const c = document.createElement('canvas');
   c.width = 150; c.height = 150;
@@ -242,7 +221,7 @@ requestAnimationFrame(rafLoop);
   document.getElementById('grain').style.backgroundImage = `url(${c.toDataURL()})`;
 })();
 
-// ── 배경 크로스페이드 ──────────────────────────
+/* ── Background Crossfade ── */
 function swapBg(url) {
   const next = activeBg === 'a' ? 'b' : 'a';
   document.getElementById('bg-' + next).style.backgroundImage = `url('${url}')`;
@@ -253,7 +232,7 @@ function swapBg(url) {
   $glow.style.opacity = '0.85';
 }
 
-// ── 서버 메시지 ────────────────────────────────
+/* ── Receive data from Python (pywebview evaluate_js) ── */
 function handleMsg(data) {
   if (data.album_art !== undefined && data.album_art !== lastArt) {
     lastArt = data.album_art;
@@ -264,7 +243,7 @@ function handleMsg(data) {
     }, 300);
   }
   if (data.title  !== undefined) $title.textContent  = data.title  || 'Apple Music을 재생하세요';
-  if (data.artist !== undefined) $artist.textContent = data.artist || '—';
+  if (data.artist !== undefined) $artist.textContent = data.artist || '\u2014';
 
   if (data.position !== undefined) { serverPos = data.position; serverTime = performance.now(); }
   if (data.duration !== undefined) { serverDur = data.duration; }
@@ -273,17 +252,6 @@ function handleMsg(data) {
     data.is_playing ? $art.classList.add('playing') : $art.classList.remove('playing');
   }
 }
-
-// ── WebSocket ──────────────────────────────────
-function connect() {
-  ws = new WebSocket(WS);
-  ws.onopen    = () => $dot.classList.remove('disconnected');
-  ws.onmessage = (e) => { try { handleMsg(JSON.parse(e.data)); } catch(_) {} };
-  ws.onerror   = () => {};
-  ws.onclose   = () => { $dot.classList.add('disconnected'); setTimeout(connect, 3000); };
-}
-
-connect();
 </script>
 </body>
 </html>
