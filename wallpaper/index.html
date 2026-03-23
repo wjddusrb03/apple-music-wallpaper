@@ -17,13 +17,14 @@
 
   .bg-layer {
     position: fixed;
-    inset: -250px;
+    inset: -150px;
     background-size: cover;
     background-position: center;
-    filter: blur(110px) brightness(0.45) saturate(2.6);
+    filter: blur(60px) brightness(0.45) saturate(2.6);
     z-index: 0;
     transition: opacity 1.6s ease;
     contain: strict;
+    will-change: opacity;
     transform: translateZ(0);
   }
   #bg-b { opacity: 0; }
@@ -36,13 +37,7 @@
     z-index: 1;
   }
 
-  #grain {
-    position: fixed; inset: 0;
-    z-index: 2;
-    opacity: 0.035;
-    background-repeat: repeat;
-    background-size: 180px 180px;
-  }
+  #grain { display: none; }
 
   #player {
     position: relative; z-index: 3;
@@ -54,9 +49,7 @@
   #glass-card {
     display: flex; flex-direction: column; align-items: center;
     padding: 44px 52px 40px;
-    background: rgba(255,255,255,0.05);
-    backdrop-filter: blur(20px) saturate(1.4);
-    -webkit-backdrop-filter: blur(20px) saturate(1.4);
+    background: rgba(18,18,30,0.65);
     border: 1px solid rgba(255,255,255,0.10);
     border-radius: 32px;
     box-shadow:
@@ -202,29 +195,21 @@ function getCurrentPos() {
   return serverPos + (performance.now() - serverTime) / 1000;
 }
 
-function rafLoop() {
-  const pos = Math.min(getCurrentPos(), serverDur);
-  const pct = serverDur > 0 ? (pos / serverDur) * 100 : 0;
-  $fill.style.width = pct + '%';
-  $curTime.textContent = fmt(pos);
-  $totTime.textContent = fmt(serverDur);
+let lastRaf = 0;
+function rafLoop(now) {
+  if (now - lastRaf > 33) {  // ~30fps max
+    lastRaf = now;
+    const pos = Math.min(getCurrentPos(), serverDur);
+    const pct = serverDur > 0 ? (pos / serverDur) * 100 : 0;
+    $fill.style.width = pct + '%';
+    $curTime.textContent = fmt(pos);
+    $totTime.textContent = fmt(serverDur);
+  }
   requestAnimationFrame(rafLoop);
 }
 requestAnimationFrame(rafLoop);
 
-(function() {
-  const c = document.createElement('canvas');
-  c.width = 150; c.height = 150;
-  const ctx = c.getContext('2d');
-  const d = ctx.createImageData(150, 150);
-  for (let i = 0; i < d.data.length; i += 4) {
-    const v = Math.random() * 255 | 0;
-    d.data[i] = d.data[i+1] = d.data[i+2] = v;
-    d.data[i+3] = 255;
-  }
-  ctx.putImageData(d, 0, 0);
-  document.getElementById('grain').style.backgroundImage = `url(${c.toDataURL()})`;
-})();
+// Film grain removed for performance
 
 function swapBg(url) {
   const next = activeBg === 'a' ? 'b' : 'a';
