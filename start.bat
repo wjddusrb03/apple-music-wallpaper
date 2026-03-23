@@ -29,7 +29,7 @@ python\python.exe get-pip.py --quiet
 del get-pip.py
 
 echo [4/4] Installing packages...
-python\python.exe -m pip install --quiet fastapi uvicorn winrt-Windows.Media.Control winrt-Windows.Foundation winrt-Windows.Foundation.Collections winrt-Windows.Storage.Streams
+python\python.exe -m pip install --quiet fastapi uvicorn websockets winrt-Windows.Media.Control winrt-Windows.Foundation winrt-Windows.Foundation.Collections winrt-Windows.Storage.Streams
 if errorlevel 1 goto INSTALL_FAIL
 
 echo.
