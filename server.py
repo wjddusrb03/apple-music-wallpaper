@@ -1,11 +1,15 @@
 import asyncio
 import json
 import base64
+import os
 import uvicorn
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
+
+# Use absolute paths (fixes VBS launch from different working directory)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 app = FastAPI()
 
@@ -16,7 +20,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.mount("/wallpaper", StaticFiles(directory="wallpaper"), name="wallpaper")
+app.mount("/wallpaper", StaticFiles(directory=os.path.join(BASE_DIR, "wallpaper")), name="wallpaper")
 
 connected_clients: list[WebSocket] = []
 current_state: dict = {}
@@ -36,7 +40,7 @@ async def _get_manager():
 
 @app.get("/")
 async def root():
-    return FileResponse("wallpaper/index.html")
+    return FileResponse(os.path.join(BASE_DIR, "wallpaper", "index.html"))
 
 
 @app.websocket("/ws")
@@ -69,10 +73,20 @@ async def broadcast(data: dict):
 async def get_session():
     manager = await _get_manager()
     sessions = manager.get_sessions()
+
+    # Priority 1: Apple Music / iTunes (exact match)
     for session in sessions:
         src = session.source_app_user_model_id.lower()
-        if "apple" in src or "itunes" in src or "music" in src:
+        if "apple" in src or "itunes" in src:
             return session
+
+    # Priority 2: Any app with "music" but NOT Windows built-in players
+    EXCLUDE = ["zune", "groove", "microsoft"]
+    for session in sessions:
+        src = session.source_app_user_model_id.lower()
+        if "music" in src and not any(ex in src for ex in EXCLUDE):
+            return session
+
     return None
 
 
@@ -192,9 +206,8 @@ async def startup():
 
 
 if __name__ == "__main__":
-    import os
     # Save PID for clean shutdown
-    pid_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "server.pid")
+    pid_file = os.path.join(BASE_DIR, "server.pid")
     with open(pid_file, "w") as f:
         f.write(str(os.getpid()))
 

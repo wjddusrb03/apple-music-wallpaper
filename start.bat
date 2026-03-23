@@ -7,7 +7,12 @@ echo   Apple Music Wallpaper
 echo ==================================================
 echo.
 
-taskkill /F /IM python.exe >nul 2>&1
+REM Kill previous server only (by PID file)
+if exist "server.pid" (
+    set /p OLD_PID=<server.pid
+    taskkill /F /PID %OLD_PID% >nul 2>&1
+    del server.pid >nul 2>&1
+)
 
 if exist "python\python.exe" goto READY
 
