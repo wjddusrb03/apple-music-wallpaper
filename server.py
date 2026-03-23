@@ -225,6 +225,7 @@ async def poll_media():
                     # 같은 곡 → 위치만 브로드캐스트 (가볍게)
                     pos_update = {
                         "position": info["position"],
+                        "duration": info["duration"],
                         "is_playing": info["is_playing"],
                     }
                     current_state.update(pos_update)

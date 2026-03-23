@@ -36,14 +36,27 @@ Apple Music (Windows) ← SMTC API → Python 서버 ← WebSocket → HTML 월�
 
 ## 설치 및 실행
 
-### 1. 프로젝트 다운로드
+### 방법 1: 설치 마법사 (추천)
+
+1. [**Download ZIP**](https://github.com/wjddusrb03/apple-music-wallpaper/archive/refs/heads/master.zip)을 클릭하여 다운로드
+2. 압축 해제
+3. **`install.bat`** 더블클릭
+
+설치 마법사가 자동으로:
+- Python 설치 확인 (없으면 다운로드 페이지 안내)
+- 필요한 패키지 설치
+- Apple Music / Lively Wallpaper 설치 확인
+- 바탕화면에 바로가기 생성
+
+### 방법 2: Git Clone
 
 ```bash
 git clone https://github.com/wjddusrb03/apple-music-wallpaper.git
 cd apple-music-wallpaper
+install.bat
 ```
 
-### 2. 원클릭 실행
+### 실행
 
 ```
 start.bat
@@ -84,6 +97,7 @@ apple-music-wallpaper/
 ├── server.py          # FastAPI 서버 (SMTC 연동 + WebSocket)
 ├── wallpaper/
 │   └── index.html     # 라이브 월페이퍼 (Lively에서 렌더링)
+├── install.bat        # 설치 마법사
 ├── start.bat          # 원클릭 실행 스크립트
 ├── requirements.txt   # Python 패키지 목록
 └── README.md
