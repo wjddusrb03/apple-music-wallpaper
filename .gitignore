@@ -1,5 +1,4 @@
-dist/
-build/
-*.spec
+python/
 __pycache__/
 *.pyc
+.claude/

@@ -15,7 +15,6 @@
     pointer-events: none;
   }
 
-  /* ── Background ── */
   .bg-layer {
     position: fixed;
     inset: -250px;
@@ -45,7 +44,6 @@
     background-size: 180px 180px;
   }
 
-  /* ── Player Card ── */
   #player {
     position: relative; z-index: 3;
     width: 100%; height: 100%;
@@ -68,7 +66,6 @@
     transform: translateZ(0);
   }
 
-  /* ── Album Art ── */
   #art-wrap { position: relative; margin-bottom: 32px; }
 
   #art-glow {
@@ -108,7 +105,6 @@
     animation: art-glow-pulse 4s ease-in-out infinite;
   }
 
-  /* ── Song Info ── */
   #song-info { text-align: center; max-width: 440px; margin-bottom: 20px; }
 
   #title {
@@ -124,7 +120,6 @@
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
 
-  /* ── Progress Bar ── */
   #progress-wrapper { width: 400px; }
   #progress-track {
     width: 100%; height: 4px;
@@ -143,6 +138,14 @@
     font-size: 11px; font-weight: 500;
     color: rgba(255,255,255,0.33);
   }
+
+  #status-dot {
+    position: fixed; bottom: 18px; right: 22px;
+    width: 7px; height: 7px; border-radius: 50%;
+    background: #4caf50; z-index: 10;
+    opacity: 0.5; transition: background 0.3s;
+  }
+  #status-dot.disconnected { background: #f44336; }
 </style>
 </head>
 <body>
@@ -160,7 +163,7 @@
     </div>
     <div id="song-info">
       <div id="title">Apple Music을 재생하세요</div>
-      <div id="artist">—</div>
+      <div id="artist">&mdash;</div>
     </div>
     <div id="progress-wrapper">
       <div id="progress-track"><div id="progress-fill"></div></div>
@@ -169,20 +172,24 @@
   </div>
 </div>
 
+<div id="status-dot"></div>
+
 <script>
-/* ── DOM Cache ── */
+const WS = 'ws://localhost:8765/ws';
+
+let ws, lastArt = '', activeBg = 'a';
+
 const $title   = document.getElementById('title');
 const $artist  = document.getElementById('artist');
 const $art     = document.getElementById('album-art');
 const $glow    = document.getElementById('art-glow');
+const $dot     = document.getElementById('status-dot');
 const $fill    = document.getElementById('progress-fill');
 const $curTime = document.getElementById('current-time');
 const $totTime = document.getElementById('total-time');
 
-let lastArt = '', activeBg = 'a';
 let serverPos = 0, serverDur = 0, serverTime = 0, isPlaying = false;
 
-/* ── Time Format ── */
 function fmt(s) {
   if (!s || s < 0) s = 0;
   const m = Math.floor(s / 60);
@@ -190,7 +197,6 @@ function fmt(s) {
   return m + ':' + (sec < 10 ? '0' : '') + sec;
 }
 
-/* ── Smooth Progress (rAF interpolation) ── */
 function getCurrentPos() {
   if (!isPlaying) return serverPos;
   return serverPos + (performance.now() - serverTime) / 1000;
@@ -206,7 +212,6 @@ function rafLoop() {
 }
 requestAnimationFrame(rafLoop);
 
-/* ── Film Grain (once) ── */
 (function() {
   const c = document.createElement('canvas');
   c.width = 150; c.height = 150;
@@ -221,7 +226,6 @@ requestAnimationFrame(rafLoop);
   document.getElementById('grain').style.backgroundImage = `url(${c.toDataURL()})`;
 })();
 
-/* ── Background Crossfade ── */
 function swapBg(url) {
   const next = activeBg === 'a' ? 'b' : 'a';
   document.getElementById('bg-' + next).style.backgroundImage = `url('${url}')`;
@@ -232,7 +236,6 @@ function swapBg(url) {
   $glow.style.opacity = '0.85';
 }
 
-/* ── Receive data from Python (pywebview evaluate_js) ── */
 function handleMsg(data) {
   if (data.album_art !== undefined && data.album_art !== lastArt) {
     lastArt = data.album_art;
@@ -252,6 +255,16 @@ function handleMsg(data) {
     data.is_playing ? $art.classList.add('playing') : $art.classList.remove('playing');
   }
 }
+
+function connect() {
+  ws = new WebSocket(WS);
+  ws.onopen    = () => $dot.classList.remove('disconnected');
+  ws.onmessage = (e) => { try { handleMsg(JSON.parse(e.data)); } catch(_) {} };
+  ws.onerror   = () => {};
+  ws.onclose   = () => { $dot.classList.add('disconnected'); setTimeout(connect, 3000); };
+}
+
+connect();
 </script>
 </body>
 </html>
