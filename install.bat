@@ -5,9 +5,9 @@ title Apple Music Wallpaper - Installer
 color 0F
 
 echo.
-echo  ╔══════════════════════════════════════════════╗
-echo  ║   Apple Music Wallpaper - Install Wizard     ║
-echo  ╚══════════════════════════════════════════════╝
+echo  ==============================================
+echo    Apple Music Wallpaper - Install Wizard
+echo  ==============================================
 echo.
 
 :: ── Step 1: Check Python ──
@@ -98,19 +98,19 @@ if exist "%SHORTCUT%" (
 
 :: ── Done ──
 echo.
-echo  ╔══════════════════════════════════════════════╗
-echo  ║          Installation Complete!              ║
-echo  ╠══════════════════════════════════════════════╣
-echo  ║                                              ║
-echo  ║  How to use:                                 ║
-echo  ║  1. Run "start.bat" or desktop shortcut      ║
-echo  ║  2. In Lively Wallpaper, click [+]           ║
-echo  ║  3. Select "Enter URL"                       ║
-echo  ║  4. Type: http://127.0.0.1:8765              ║
-echo  ║  5. Play music in Apple Music                ║
-echo  ║                                              ║
-echo  ║  (Lively remembers the URL after first use)  ║
-echo  ╚══════════════════════════════════════════════╝
+echo  ==============================================
+echo           Installation Complete!
+echo  ==============================================
+echo.
+echo   How to use:
+echo    1. Run "start.bat" or desktop shortcut
+echo    2. In Lively Wallpaper, click [+]
+echo    3. Select "Enter URL"
+echo    4. Type: http://127.0.0.1:8765
+echo    5. Play music in Apple Music
+echo.
+echo   (Lively remembers the URL after first use)
+echo  ==============================================
 echo.
 
 choice /C YN /M "  Launch now? (Y/N)"
