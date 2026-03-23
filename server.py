@@ -192,6 +192,12 @@ async def startup():
 
 
 if __name__ == "__main__":
+    import os
+    # Save PID for clean shutdown
+    pid_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "server.pid")
+    with open(pid_file, "w") as f:
+        f.write(str(os.getpid()))
+
     print("=" * 50)
     print(" Apple Music Wallpaper Server")
     print(" http://localhost:8765")
