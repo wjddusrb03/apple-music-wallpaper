@@ -68,7 +68,7 @@ start.bat
 - 서버 시작 (백그라운드)
 - Lively Wallpaper 실행
 
-### 3. Lively Wallpaper 설정 (최초 1회)
+### Lively Wallpaper 설정 (최초 1회)
 
 1. Lively Wallpaper에서 **[+]** 버튼 클릭
 2. **"URL 입력"** 선택
@@ -77,7 +77,7 @@ start.bat
 
 > 한 번 등록하면 Lively가 기억하므로, 이후에는 `start.bat`만 실행하면 됩니다.
 
-### 4. Apple Music에서 음악 재생
+### Apple Music에서 음악 재생
 
 Apple Music 데스크톱 앱에서 곡을 재생하면 바탕화면에 자동으로 표시됩니다.
 

@@ -81,37 +81,6 @@ async def get_session():
     return None
 
 
-# ── 컨트롤 ─────────────────────────────────────
-@app.post("/control/{action}")
-async def control(action: str, position: float = 0):
-    try:
-        from winrt.windows.media.control import (
-            GlobalSystemMediaTransportControlsSessionPlaybackStatus as Status,
-        )
-        session = await get_session()
-        if not session:
-            return {"status": "no_session"}
-
-        if action == "toggle":
-            info = session.get_playback_info()
-            if info.playback_status == Status.PLAYING:
-                await session.try_pause_async()
-            else:
-                await session.try_play_async()
-        elif action == "next":
-            await session.try_skip_next_async()
-        elif action == "prev":
-            await session.try_skip_previous_async()
-        elif action == "seek":
-            ticks = int(position * 10_000_000)
-            await session.try_change_playback_position_async(ticks)
-
-        return {"status": "ok"}
-    except Exception as e:
-        print(f"[Control Error] {e}")
-        return {"status": "error", "message": str(e)}
-
-
 # ── 앨범 아트 (캐시 사용) ──────────────────────
 async def _read_album_art(thumbnail) -> str:
     from winrt.windows.storage.streams import DataReader, Buffer, InputStreamOptions
