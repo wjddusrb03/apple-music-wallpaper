@@ -37,26 +37,28 @@ echo   Setup complete!
 echo.
 
 :READY
-echo [*] Starting server...
 echo.
-start /min "AMW_Server" python\python.exe server.py
-
-timeout /t 2 /nobreak >nul
-
-start "" explorer.exe "shell:AppsFolder\12030rocksdanister.LivelyWallpaper_97hta09mmv6hy!App"
-
 echo ==================================================
-echo   Server running at http://localhost:8765
+echo   Setup complete! Starting server...
 echo ==================================================
 echo.
-echo   First time? Do this once in Lively Wallpaper:
+echo   Lively Wallpaper setup (one time only):
 echo     1. Click [+] button
 echo     2. Select "Enter URL"
 echo     3. Paste:  http://localhost:8765
 echo     4. Done!
 echo.
-echo   Press any key to stop the server...
+echo   Next time, use AppleMusicWallpaper.vbs
+echo   to start without any CMD window.
+echo.
 echo ==================================================
+
+start /min "AMW_Server" python\python.exe server.py
+timeout /t 2 /nobreak >nul
+start "" explorer.exe "shell:AppsFolder\12030rocksdanister.LivelyWallpaper_97hta09mmv6hy!App"
+
+echo.
+echo   Server is running. Press any key to stop...
 pause >nul
 taskkill /F /FI "WINDOWTITLE eq AMW_Server" >nul 2>&1
 echo Server stopped.
